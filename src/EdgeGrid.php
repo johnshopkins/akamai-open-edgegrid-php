@@ -22,7 +22,7 @@
  * limitations under the License.
  */
 
-namespace Akamai;a
+namespace Akamai;
 
 /**
  * Client to access {OPEN} API
@@ -57,8 +57,9 @@ class EdgeGrid {
 	/**
 	 * Constructor
 	 *
-	 * @param string $section			[default]  Section of .edgerc to use, default: 'default'
-	 * @param string $edgerc_location	[optional]	Full path to .edgerc file
+	 * @param array  $auth      	    [optional] Contains authentication information. [ "host" => "xxxx", "client_token" => "xxxx", "client_secret" => "xxxx", "access_token" => "xxxx", "max_body" => 131072 ]
+	 * @param string $section			    [default]  Section of .edgerc to use, default: 'default'
+	 * @param string $edgerc_location	[optional] Full path to .edgerc file
 	 *
 	 * Loads configuration data from:
 	 * 1) @param string $edgerc_location (Full path to .edgerc)
@@ -67,18 +68,37 @@ class EdgeGrid {
 	 *
 	 * @throws		Array of errors
 	 */
-	function __construct($verbose = false, $section = 'default', $edgerc_location = null) {
+	function __construct($verbose = false, $auth = array(), $section = 'default', $edgerc_location = null) {
+
 		$this->verbose = $verbose;
 
 		$this->method = strtoupper($this->method);
 		$this->protocol = strtolower($this->protocol);
 
-		if ($section !== 'default') {
-			$this->verbose('section', $section);
+		// try auth attay
+		if ($auth) {
+			$this->verbose('auth', $auth);
+			$success = $this->setAuthFromAuthArray($auth);
+			if ($success) return;
 		}
+
+		// try edgerc file
 		if ($edgerc_location) {
-			$this->verbose('edgerc_location', $edgerc_location);
+
+			if ($section !== 'default') $this->verbose('section', $section);
+			$success = $this->setAuthFromEdgerc($section, $edgerc_location);
+			if ($success) return;
 		}
+
+		// no valid authenication provided
+		$this->error_array[] = "Valid authentication not provided";
+		$this->verbose('Errors', $this->error_array);
+
+	}
+
+	protected function setAuthFromEdgerc($section, $edgerc_location)
+	{
+		$this->verbose('edgerc_location', $edgerc_location);
 
 		if ($edgerc = $this->loadEdgerc($section, $edgerc_location)) {
 			$this->verbose('Credentials', $edgerc);
@@ -88,9 +108,31 @@ class EdgeGrid {
 			$this->access_token = $edgerc[$section]['access_token'];
 			$this->headers_to_sign = [];
 			$this->max_body = isset($edgerc[$section]['max_body']) ? $edgerc[$section]['max_body'] : 131072;
+			return true;
 		} else {
 			$this->verbose('Errors', $this->error_array);
+			return false;
 		}
+	}
+
+	protected function setAuthFromAuthArray($auth)
+	{
+		// force array if object
+		$auth = json_decode(json_encode($auth), true);
+
+		if (!isset($auth['host']) || !isset($auth['client_token']) || !isset($auth['client_secret']) || !isset($auth['access_token'])) {
+			return false;
+		}
+
+		$this->verbose('Credentials', $auth);
+		$this->host = $auth['host'];
+		$this->client_token = $auth['client_token'];
+		$this->client_secret = $auth['client_secret'];
+		$this->access_token = $auth['access_token'];
+		$this->headers_to_sign = [];
+		$this->max_body = isset($auth['max_body']) ? $auth['max_body'] : 131072;
+
+		return true;
 	}
 
 	/**
