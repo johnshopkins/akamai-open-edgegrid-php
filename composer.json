@@ -1,0 +1,21 @@
+{
+  "name": "jenwachter/akamai-open-edgegrid-php",
+  "version": "0.0.0",
+  "description": "Akamai OPEN EdgeGrid PHP authorization wrapper",
+  "license": "MIT",
+  "homepage": "http://github.com/jenwachter/akamai-open-edgegrid-php",
+  "authors": [
+    {
+      "name": "jenwachter",
+      "homepage": "https://github.com/jenwachter"
+    }
+  ],
+  "require": {
+
+  },
+  "autoload": {
+    "psr-4" : {
+      "Akamai\\" : ["src/", "tests/"]
+    }
+  }
+}
