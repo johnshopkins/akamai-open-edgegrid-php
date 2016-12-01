@@ -1,5 +1,5 @@
 {
-  "name": "jenwachter/akamai-open-edgegrid-php",
+  "name": "johnshopkins/akamai-open-edgegrid-php",
   "version": "0.0.0",
   "description": "Akamai OPEN EdgeGrid PHP authorization wrapper",
   "license": "MIT",
