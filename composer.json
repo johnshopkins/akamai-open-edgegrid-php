@@ -4,9 +4,6 @@
   "description": "Akamai OPEN EdgeGrid PHP authorization wrapper",
   "license": "MIT",
   "homepage": "http://github.com/johnshopkins/akamai-open-edgegrid-php",
-  "require": {
-
-  },
   "autoload": {
     "psr-4" : {
       "Akamai\\" : ["src/", "tests/"]
